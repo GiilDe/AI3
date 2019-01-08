@@ -1,6 +1,4 @@
-
 import numpy as np
-
 
 def euclidean_distance(feature_list1, feature_list2):
     dist = 0

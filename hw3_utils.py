@@ -1,8 +1,7 @@
-data_path = r'data/Data.pickle'
 import pickle
 import numpy as np
 
-
+data_path = r'data/Data.pickle'
 
 
 def load_data(path=r'data/Data.pickle'):
@@ -16,8 +15,7 @@ def load_data(path=r'data/Data.pickle'):
     '''
     with open(path,'rb') as f:
         train_features, train_labels, test_features = pickle.load(f)
-    return train_features, train_labels ,test_features
-
+    return train_features, train_labels, test_features
 
 
 def write_prediction(pred, path='results.data'):
@@ -63,3 +61,23 @@ class abstract_classifier:
         raise Exception('Not implemented')
 
 
+def get_accuracy(classifier: abstract_classifier, test_set, test_labels):
+    positive = 0
+    for (features, label) in zip(test_set, test_labels):
+        if classifier.classify(features) == label:
+            positive = positive + 1
+    accuracy = positive/len(test_set)
+    return accuracy
+
+
+def k_fold_cross_validation(learning_algorithm, data, labels, learning_param, k):
+    step = len(data)/k
+    accuracies = []
+    for i in range(0, len(data)-step, step):
+        test_set = data[i:i+step]
+        test_labels = labels[i:i+step]
+        current_training = data - test_set
+        current_labels = labels - test_labels
+        classifier = learning_algorithm(current_training, current_labels, learning_param)
+        accuracies.append(get_accuracy(classifier, test_set, test_labels))
+    return sum(accuracies)/len(accuracies)
