@@ -118,9 +118,42 @@ def test_parameter_knn(possible_values, k):
     print(results)
     return np.average(accuracies), np.average(errors)
 
+def split_crosscheck_groups(dataset, num_folds):
+    examples = list(dataset[0])
+    labels = dataset[1]
+    true_rate = labels.count(True) / len(labels)
+    examples_in_group = len(dataset[0]) / num_folds
+    true_in_group = int(examples_in_group * true_rate)
+    false_in_group = examples_in_group - true_in_group
+
+    for i in range(1, num_folds):
+        current_examples = []
+        current_labels = []
+        current_true = 0
+        current_false = 0
+        current_size = 0
+        index = 0
+        while current_size < examples_in_group:
+            if labels[index] == True and current_true < true_in_group:
+                current_labels.append(True)
+                labels.pop(index)
+                current_examples.append(examples[index])
+                examples.pop(index)
+                current_size += 1
+            elif labels[index] == False and current_false < false_in_group:
+                current_labels.append(False)
+                labels.pop(index)
+                current_examples.append(examples[index])
+                examples.pop(index)
+                current_size += 1
+            else:
+                index += 1
+        pickle.dump((current_examples, current_labels), open('ecg_fold_%d' % i, 'wb'))
+    pickle.dump((examples, labels), open('ecg_fold_%d' % num_folds, 'wb'))
+
 
 # dataset = zip(examples, labels), assumes len(data) is divisible by num_folds
-def split_crosscheck_groups(dataset, num_folds):
+def old_split_crosscheck_groups(dataset, num_folds):
     examples = dataset[0]
     labels = dataset[1]
     step = int(len(dataset[0])/num_folds)

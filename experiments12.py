@@ -1,4 +1,3 @@
-
 import classifier
 from hw3_utils import load_data
 from sklearn.tree import DecisionTreeClassifier
