@@ -21,31 +21,66 @@ class knn_classifier(abstract_classifier):
     def classify(self, features):
         examples_distances = [euclidean_distance(features, example) for example in self.training_set]
         kth_distance = np.partition(examples_distances, self.K)[self.K]
-        kth_smallest = [1 if label else -1 for (example, label) in zip(self.training_set, self.training_labels)
-                        if euclidean_distance(features, example) <= kth_distance]
-        return sum(kth_smallest) > 0
+        return sum(bool_to_int(label) for (example, label) in zip(self.training_set, self.training_labels)
+                   if euclidean_distance(features, example) <= kth_distance) > 0
+
+
+class ensemble_factory(abstract_classifier_factory):
+    def __init__(self, factories):
+        self.factories = factories
+
+    def train(self, data, labels):
+        classifiers = [factory.train(data, labels) for factory in self.factories]
+        return classifier_ensemble(classifiers)
+
+
+class classifier_ensemble(abstract_classifier):
+    def __init__(self, classifiers):
+        self.classifiers = classifiers
+
+    def classify(self, features):
+        return sum(bool_to_int(classifier.classify(features)) for classifier in self.classifiers) > 0
+
+
+class sklearn_factory_wrapper(abstract_classifier_factory):
+    def __init__(self, classifier_factory):
+        self.classifier_factory = classifier_factory
+
+    def train(self, data, labels)->abstract_classifier:
+        return sklearn_classifier_wrapper(self.classifier_factory.fit(data, labels))
+
+
+class sklearn_classifier_wrapper(abstract_classifier):
+    def __init__(self, classifier):
+        self.classifier = classifier
+
+    def classify(self, features):
+        shaped = np.array(features).reshape(1, len(features))
+        return self.classifier.predict(shaped)
+
+
+def bool_to_int(b: bool):
+    res = 1 if b else -1
+    return res
 
 
 def euclidean_distance(feature_list1, feature_list2):
-    dist = 0
-    for feature1, feature2 in zip(feature_list1, feature_list2):
-        dist += (feature1-feature2)**2
-    return np.sqrt(dist)
+    s = sum((feature1-feature2)**2 for feature1, feature2 in zip(feature_list1, feature_list2))
+    return np.sqrt(s)
 
 
-def get_accuracy(classifier, test_set, test_labels):
+def get_accuracy(classifier: abstract_classifier, test_set, test_labels):
     positive = 0
     negative = 0
     for (features, label) in zip(test_set, test_labels):
-        shaped = np.array(features).reshape(1, 187)
-        if classifier.predict(shaped) == label:
+        if classifier.classify(features) == label:
             positive = positive + 1
         else:
             negative = negative + 1
     return positive/len(test_set), negative/len(test_set)
 
 
-def evaluate(classifier_factory, k):
+def evaluate(classifier_factory: abstract_classifier_factory, k):
     all_examples = []
     all_labels = []
     for i in range(0, k):
@@ -56,7 +91,7 @@ def evaluate(classifier_factory, k):
 
 
 # assuming that len(data) is divisible by given k
-def k_fold_cross_validation(classifier_factory, data, labels, k):
+def k_fold_cross_validation(classifier_factory: abstract_classifier_factory, data, labels, k):
     accuracies = []
     errors = []
     for i in range(0, k):
@@ -65,11 +100,11 @@ def k_fold_cross_validation(classifier_factory, data, labels, k):
         r = 0 if i != 0 else 1
         current_training = data[r]
         current_labels = labels[r]
-        for j in range(r+1, k):
+        for j in range(r + 1, k):
             if j != i:
                 current_training = np.concatenate((current_training, data[j]))
                 current_labels = np.concatenate((current_labels, labels[j]))
-        classifier = classifier_factory.fit(current_training, current_labels)
+        classifier = classifier_factory.train(current_training, current_labels)
         accuracy, error = get_accuracy(classifier, test_set, test_labels)
         accuracies.append(accuracy)
         errors.append(error)
@@ -78,8 +113,9 @@ def k_fold_cross_validation(classifier_factory, data, labels, k):
 
 def test_parameter_knn(possible_values, k):
     results = [(value, evaluate(knn_factory(value), k)) for value in possible_values]
-    accuracies = [accuracy for (value, accuracy, error) in results]
-    errors = [error for (value, accuracy, error) in results]
+    accuracies = [accuracy for (value, (accuracy, error)) in results]
+    errors = [error for (value, (accuracy, error)) in results]
+    print(results)
     return np.average(accuracies), np.average(errors)
 
 

@@ -1,7 +1,7 @@
 
 import classifier, hw3_utils
 
-examples, labels, test = hw3_utils.load_data()
+examples, labels, test_features = hw3_utils.load_data()
 data = []
 data.append(examples)
 data.append(labels)
