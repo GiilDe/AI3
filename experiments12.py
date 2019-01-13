@@ -4,13 +4,11 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import Perceptron
 
 
-arr = [1,2,3,4,5]
-
-
+arr = [1, 2, 3, 4, 5]
 
 # experiment 1
 examples, labels, test = load_data()
-data = []
+data = list()
 data.append(examples)
 data.append(labels)
 classifier.split_crosscheck_groups(data, 2)
@@ -21,6 +19,6 @@ print("%.2f, %.2f" % (accuracy, error))
 
 # experiment 2
 perceptron = classifier.sklearn_factory_wrapper(Perceptron())
-accuracy, error = classifier.evaluate(perceptron, 2)
+accuracy, error = classifier.evaluate(perceptron, 3)
 print("%.2f, %.2f" % (accuracy, error))
 
