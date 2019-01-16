@@ -53,10 +53,11 @@ def weights_score(weights):
     return score
 
 
-def train_weights(splits_num, train_len):
+def train_weights(splits_num, train_len=None):
     examples, labels, test_features = load_data()
-    examples = examples[0:train_len]
-    labels = labels[0:train_len]
+    if train_len != None:
+        examples = examples[0:train_len]
+        labels = labels[0:train_len]
     data = list()
     data.append(examples)
     data.append(labels)
@@ -65,6 +66,7 @@ def train_weights(splits_num, train_len):
     weights = hill_climbing(f=weights_score, num_iter=100, directions=5, initial_step_size=2, N=5, best_N=None,
                             length=len(weights), T=5)
     return weights
+
 
 k = 2
 print(train_weights(k, 500))
