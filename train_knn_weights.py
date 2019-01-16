@@ -68,7 +68,7 @@ def train_weights(splits_num, train_len=None):
     else:
         initial_vector = None
 
-    weights = hill_climbing(f=weights_score, num_iter=100, initial_vector=initial_vector, directions=5,
+    weights = hill_climbing(f=weights_score, num_iter=100, initial_vector=initial_vector, directions=2,
                             initial_step_size=5, N=5, length=len(weights), T=2)
     return weights
 
