@@ -95,6 +95,7 @@ def k_fold_cross_validation(classifier_factory: abstract_classifier_factory, dat
     accuracies = []
     errors = []
     for i in range(0, k):
+        print(i+1, 'out of', k, 'in k_fold_cross_validation')
         test_set = data[i]
         test_labels = labels[i]
         r = 0 if i != 0 else 1
@@ -118,6 +119,7 @@ def test_parameter_knn(possible_values, k):
     print(results)
     return np.average(accuracies), np.average(errors)
 
+
 def split_crosscheck_groups(dataset, num_folds):
     examples = list(dataset[0])
     labels = dataset[1]
@@ -126,7 +128,7 @@ def split_crosscheck_groups(dataset, num_folds):
     true_in_group = int(examples_in_group * true_rate)
     false_in_group = examples_in_group - true_in_group
 
-    for i in range(1, num_folds):
+    for i in range(num_folds):
         current_examples = []
         current_labels = []
         current_true = 0
