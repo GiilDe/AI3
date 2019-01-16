@@ -2,11 +2,11 @@ from hw3_utils import *
 import numpy as np
 from random_hill_climbing import hill_climbing
 from classifier import load_k_fold_data, split_crosscheck_groups, k_fold_cross_validation
-
+import os.path
 
 def weighted_euclidean_distance(feature_list1, feature_list2, weights):
     s = sum([(weight*(feature1-feature2)**2) for feature1, feature2, weight in zip(feature_list1, feature_list2, weights)])
-    return np.sqrt(s)
+    return np.sqrt(abs(s))
 
 
 def bool_to_int(b: bool):
@@ -63,10 +63,29 @@ def train_weights(splits_num, train_len=None):
     data.append(labels)
     weights = np.zeros(len(examples[0]))
     split_crosscheck_groups(data, splits_num)
-    weights = hill_climbing(f=weights_score, num_iter=100, directions=5, initial_step_size=2, N=5, best_N=None,
-                            length=len(weights), T=5)
+    if os.path.isfile('random_hill_climbing_max_tup'):
+        initial_vector = pickle.load(open('random_hill_climbing_max_tup', 'rb'))[0]
+    else:
+        initial_vector = None
+
+    weights = hill_climbing(f=weights_score, num_iter=100, initial_vector=initial_vector, directions=5,
+                            initial_step_size=5, N=5, length=len(weights), T=2)
     return weights
 
 
 k = 2
-print(train_weights(k, 500))
+
+# weights = pickle.load(open('random_hill_climbing_max_tup', 'rb'))[0]
+#
+# print(weights)
+
+train_weights(k, 500)
+weights = pickle.load(open('random_hill_climbing_max_tup', 'rb'))[0]
+
+examples, labels, test_features = load_data()
+data = list()
+data.append(examples)
+data.append(labels)
+split_crosscheck_groups(data, 2)
+
+weights_score(weights)
