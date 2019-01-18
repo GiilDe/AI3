@@ -1,10 +1,10 @@
-import classifier, hw3_utils
+from hw3_utils import *
 from classifier import *
 
 
-examples, labels, test_features = hw3_utils.load_data()
+examples, labels, test_features = load_data()
 data = []
 data.append(examples)
 data.append(labels)
-classifier.split_crosscheck_groups(data, 2)
-classifier.test_parameter_knn(range(1, 15, 2), 2)
+split_crosscheck_groups(data, 2)
+test_parameter_knn(range(1, 15, 2), 2)

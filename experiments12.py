@@ -4,8 +4,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import Perceptron
 
 
-arr = [1, 2, 3, 4, 5]
-
 # experiment 1
 examples, labels, test = load_data()
 data = list()
