@@ -26,20 +26,23 @@ class knn_classifier(abstract_classifier):
 
 
 class ensemble_factory(abstract_classifier_factory):
-    def __init__(self, factories):
+    def __init__(self, factories, weights):
         self.factories = factories
+        self.weights = weights
 
     def train(self, data, labels):
         classifiers = [factory.train(data, labels) for factory in self.factories]
-        return classifier_ensemble(classifiers)
+        return classifier_ensemble(classifiers, self.weights)
 
 
 class classifier_ensemble(abstract_classifier):
-    def __init__(self, classifiers):
+    def __init__(self, classifiers, weights):
         self.classifiers = classifiers
+        self.weights = weights
 
     def classify(self, features):
-        return sum(bool_to_int(classifier.classify(features)) for classifier in self.classifiers) > 0
+        return sum(weight*bool_to_int(classifier.classify(features)) for weight, classifier in
+                   zip(self.weights, self.classifiers)) > 0
 
 
 class sklearn_factory_wrapper(abstract_classifier_factory):

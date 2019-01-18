@@ -1,7 +1,4 @@
-
 import pickle
-
-data_path = r'data/Data.pickle'
 
 
 def load_data(path=r'data/Data.pickle'):
